@@ -3,6 +3,11 @@ add_executable(
   InsightEventJsonTest.cpp
   TaskSampleCollectorTest.cpp
   TaskInsightSessionTest.cpp
+  rules/SpillDetectedRuleTest.cpp
+  rules/OutputBackpressureRuleTest.cpp
+  rules/ScanLowSelectivityRuleTest.cpp
+  rules/ScanIoBoundRuleTest.cpp
+  rules/QueryStalledRuleTest.cpp
 )
 
 target_compile_features(bolt_exec_insights_test PRIVATE cxx_std_20)

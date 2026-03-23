@@ -3,6 +3,11 @@ bolt_add_library(
   InsightEventJson.cpp
   TaskSampleCollector.cpp
   TaskInsightSession.cpp
+  rules/SpillDetectedRule.cpp
+  rules/OutputBackpressureRule.cpp
+  rules/ScanLowSelectivityRule.cpp
+  rules/ScanIoBoundRule.cpp
+  rules/QueryStalledRule.cpp
 )
 
 target_link_libraries(
