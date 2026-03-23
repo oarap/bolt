@@ -1,5 +1,6 @@
 #include "bolt/exec/insights/TaskInsightSession.h"
 #include "bolt/common/time/Timer.h"
+#include "bolt/exec/TaskStructs.h"
 
 namespace bytedance::bolt::exec::insights {
 
@@ -36,6 +37,12 @@ void TaskInsightSession::doPoll() {
   sample.timestampMs = bytedance::bolt::getCurrentTimeMs();
   sample.taskStats = task_->taskStats();
   sampleCollector_.addSample(std::move(sample));
+
+  auto state = task_->state();
+  if (state == TaskState::kFinished || state == TaskState::kCanceled ||
+      state == TaskState::kAborted || state == TaskState::kFailed) {
+    close();
+  }
 }
 
 std::vector<InsightEvent> TaskInsightSession::poll() {
@@ -52,14 +59,13 @@ QuerySnapshot TaskInsightSession::snapshot() const {
   auto latest = sampleCollector_.getLatestSample();
   if (latest) {
     const auto& stats = latest->taskStats;
-    // Assuming task state can be converted to string, for now a placeholder
-    snapshot.taskState = "RUNNING"; // task_->state() to string?
-    // Map stats appropriately here
+    snapshot.taskState = taskStateString(task_->state());
     snapshot.startTimeMs = stats.executionStartTimeMs;
     snapshot.elapsedMs = snapshot.startTimeMs > 0
         ? (latest->timestampMs - snapshot.startTimeMs)
         : 0;
 
+    snapshot.outputBufferUtilization = stats.outputBufferUtilization;
     snapshot.numTotalDrivers = stats.numTotalDrivers;
     snapshot.numRunningDrivers = stats.numRunningDrivers;
     int blockedSum = 0;
@@ -67,6 +73,23 @@ QuerySnapshot TaskInsightSession::snapshot() const {
       blockedSum += count;
     }
     snapshot.numBlockedDrivers = blockedSum;
+
+    uint64_t spilledBytes = 0;
+    uint64_t rawInputRows = 0;
+    uint64_t outputRows = 0;
+    for (const auto& pipeline : stats.pipelineStats) {
+      for (const auto& op : pipeline.operatorStats) {
+        spilledBytes += op.spilledBytes;
+        rawInputRows += op.rawInputPositions;
+        if (pipeline.outputPipeline) {
+          // Approximation: sum of output positions from output pipeline ops
+          outputRows += op.outputPositions;
+        }
+      }
+    }
+    snapshot.spilledBytes = spilledBytes;
+    snapshot.rawInputRows = rawInputRows;
+    snapshot.outputRows = outputRows;
   }
 
   return snapshot;

@@ -42,6 +42,7 @@ class TaskInsightSession
   SessionMetadata metadata_;
 
   std::atomic<bool> closed_{false};
+  uint64_t nextSequenceId_{0};
   TaskSampleCollector sampleCollector_;
 
   // Empty engine pointer for Phase 1

@@ -1,0 +1,23 @@
+--- /home/omer.arap/bolt/bolt/exec/insights/TaskInsightSession.cpp
++++ /home/omer.arap/bolt/bolt/exec/insights/TaskInsightSession.cpp
+@@ -1,6 +1,7 @@
+ #include "bolt/exec/insights/TaskInsightSession.h"
+ #include "bolt/common/time/Timer.h"
++#include "bolt/exec/TaskStructs.h"
+ 
+ namespace bytedance::bolt::exec::insights {
+ 
+@@ -35,6 +36,17 @@
+   sample.taskStats = task_->taskStats();
+   sampleCollector_.addSample(std::move(sample));
++
++  auto state = task_->state();
++  if (state == TaskState::kFinished || state == TaskState::kCanceled ||
++      state == TaskState::kAborted || state == TaskState::kFailed) {
++    // terminal state handling
++    // close the session after final poll
++    // For now just close, in the future we emit terminal events here
++    // Actually, let's close after this poll
++    close();
++  }
+ }
