@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-namespace bolt::exec::insights {
+namespace bytedance::bolt::exec::insights {
 
 enum class InsightState { kNew, kUpdated, kResolved };
 
@@ -64,4 +64,4 @@ struct QuerySnapshot {
   std::vector<std::string> openInsightKinds;
 };
 
-} // namespace bolt::exec::insights
+} // namespace bytedance::bolt::exec::insights

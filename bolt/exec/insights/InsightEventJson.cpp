@@ -1,7 +1,7 @@
 #include "bolt/exec/insights/InsightEventJson.h"
 #include <folly/json.h>
 
-namespace bolt::exec::insights {
+namespace bytedance::bolt::exec::insights {
 
 namespace {
 
@@ -123,4 +123,4 @@ folly::dynamic toJson(const QuerySnapshot& snapshot) {
   return obj;
 }
 
-} // namespace bolt::exec::insights
+} // namespace bytedance::bolt::exec::insights

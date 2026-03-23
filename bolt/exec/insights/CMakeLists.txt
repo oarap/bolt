@@ -1,6 +1,8 @@
 bolt_add_library(
   bolt_exec_insights
   InsightEventJson.cpp
+  TaskSampleCollector.cpp
+  TaskInsightSession.cpp
 )
 
 target_link_libraries(

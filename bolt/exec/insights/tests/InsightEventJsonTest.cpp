@@ -2,7 +2,7 @@
 #include <folly/json.h>
 #include <gtest/gtest.h>
 
-using namespace bolt::exec::insights;
+using namespace bytedance::bolt::exec::insights;
 
 TEST(InsightEventJsonTest, SerializeScope) {
   InsightScope scope;

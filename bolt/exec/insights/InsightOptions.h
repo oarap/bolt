@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace bolt::exec::insights {
+namespace bytedance::bolt::exec::insights {
 
 struct InsightOptions {
   int64_t pollIntervalMs{500};
@@ -10,4 +10,4 @@ struct InsightOptions {
   int32_t minSamplesForRules{2};
 };
 
-} // namespace bolt::exec::insights
+} // namespace bytedance::bolt::exec::insights

@@ -1,6 +1,7 @@
 add_executable(
   bolt_exec_insights_test
   InsightEventJsonTest.cpp
+  TaskSampleCollectorTest.cpp
 )
 
 target_compile_features(bolt_exec_insights_test PRIVATE cxx_std_20)
