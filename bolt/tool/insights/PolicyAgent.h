@@ -10,18 +10,15 @@ namespace bytedance::bolt::tool::insights {
 
 class PolicyAgent {
  public:
-  enum class Action {
-    kContinue,
-    kCancel,
-    kRerun
-  };
+  enum class Action { kContinue, kCancel, kRerun };
 
   struct PolicyDecision {
     Action action;
     std::string reason;
   };
 
-  PolicyDecision evaluate(const std::vector<exec::insights::InsightEvent>& events);
+  PolicyDecision evaluate(
+      const std::vector<exec::insights::InsightEvent>& events);
 };
 
 } // namespace bytedance::bolt::tool::insights

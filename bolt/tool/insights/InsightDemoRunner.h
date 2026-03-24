@@ -14,15 +14,16 @@ class InsightDemoRunner {
   InsightDemoRunner();
 
   void runScenario(const std::string& scenarioName);
-  
+
   // Commands for CLI
   void snapshot();
   void stream();
   void cancel();
-  
+
  private:
-  void runWithPolicy(const std::shared_ptr<exec::insights::TaskInsightSession>& session);
-  
+  void runWithPolicy(
+      const std::shared_ptr<exec::insights::TaskInsightSession>& session);
+
   PolicyAgent agent_;
 };
 

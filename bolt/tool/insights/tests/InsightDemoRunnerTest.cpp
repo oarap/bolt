@@ -1,8 +1,8 @@
 // Copyright (c) ByteDance Ltd. and/or its affiliates.
 // SPDX-License-Identifier: Apache-2.0
 
-#include <gtest/gtest.h>
 #include "bolt/tool/insights/InsightDemoRunner.h"
+#include <gtest/gtest.h>
 #include "bolt/tool/insights/PolicyAgent.h"
 
 namespace bytedance::bolt::tool::insights::test {
@@ -26,7 +26,7 @@ TEST_F(InsightDemoRunnerTest, PolicyAgentDecisions) {
   infoEvent.severity = exec::insights::InsightSeverity::kInfo;
   infoEvent.state = exec::insights::InsightState::kNew;
   events.push_back(infoEvent);
-  
+
   decision = agent.evaluate(events);
   EXPECT_EQ(decision.action, PolicyAgent::Action::kContinue);
 
