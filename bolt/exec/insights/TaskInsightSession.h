@@ -45,8 +45,8 @@ class TaskInsightSession
   uint64_t nextSequenceId_{0};
   TaskSampleCollector sampleCollector_;
 
-  // Empty engine pointer for Phase 1
-  // std::unique_ptr<InsightEngine> engine_;
+  // Engine pointer
+  std::unique_ptr<InsightEngine> engine_;
 };
 
 } // namespace bytedance::bolt::exec::insights

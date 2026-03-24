@@ -1,0 +1,14 @@
+--- bolt/exec/insights/TaskInsightSession.h
++++ bolt/exec/insights/TaskInsightSession.h
+@@ -44,8 +44,8 @@
+   std::atomic<bool> closed_{false};
+   uint64_t nextSequenceId_{0};
+   TaskSampleCollector sampleCollector_;
+ 
+-  // Empty engine pointer for Phase 1
+-  // std::unique_ptr<InsightEngine> engine_;
++  // Engine pointer
++  std::unique_ptr<InsightEngine> engine_;
+ };
+ 
+ } // namespace bytedance::bolt::exec::insights

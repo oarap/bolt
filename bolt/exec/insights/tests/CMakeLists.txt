@@ -2,7 +2,9 @@ add_executable(
   bolt_exec_insights_test
   InsightEventJsonTest.cpp
   TaskSampleCollectorTest.cpp
+  InsightEngineTest.cpp
   TaskInsightSessionTest.cpp
+  TaskInsightExecutionTest.cpp
   rules/SpillDetectedRuleTest.cpp
   rules/OutputBackpressureRuleTest.cpp
   rules/ScanLowSelectivityRuleTest.cpp

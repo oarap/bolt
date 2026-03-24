@@ -1,6 +1,7 @@
 #include "bolt/exec/insights/TaskInsightSession.h"
 #include "bolt/common/time/Timer.h"
 #include "bolt/exec/TaskStructs.h"
+#include "bolt/exec/insights/InsightEngine.h"
 
 namespace bytedance::bolt::exec::insights {
 
@@ -11,7 +12,8 @@ TaskInsightSession::TaskInsightSession(
     : task_(std::move(task)),
       options_(std::move(options)),
       metadata_(std::move(metadata)),
-      sampleCollector_(options_.historyWindowSize) {}
+      sampleCollector_(options_.historyWindowSize),
+      engine_(std::make_unique<InsightEngine>()) {}
 
 TaskInsightSession::~TaskInsightSession() {
   close();
@@ -47,8 +49,20 @@ void TaskInsightSession::doPoll() {
 
 std::vector<InsightEvent> TaskInsightSession::poll() {
   doPoll();
-  // We don't have the engine yet, so return empty events.
-  return {};
+
+  if (!engine_)
+    return {};
+
+  auto events = engine_->evaluate(sampleCollector_, options_);
+
+  // Set sequence ids and metadata
+  for (auto& event : events) {
+    event.sequenceId = ++nextSequenceId_;
+    event.queryId = metadata_.queryId;
+    event.taskId = metadata_.taskId ? metadata_.taskId : task_->taskId();
+  }
+
+  return events;
 }
 
 QuerySnapshot TaskInsightSession::snapshot() const {
@@ -90,6 +104,11 @@ QuerySnapshot TaskInsightSession::snapshot() const {
     snapshot.spilledBytes = spilledBytes;
     snapshot.rawInputRows = rawInputRows;
     snapshot.outputRows = outputRows;
+
+    if (engine_) {
+      snapshot.openInsightCount = engine_->getOpenInsightCount();
+      snapshot.openInsightKinds = engine_->getOpenInsightKinds();
+    }
   }
 
   return snapshot;

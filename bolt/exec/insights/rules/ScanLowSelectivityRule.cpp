@@ -21,11 +21,14 @@ std::optional<InsightEvent> ScanLowSelectivityRule::evaluate(
         uint64_t in = op.rawInputPositions;
         uint64_t out = op.outputPositions;
         
+        uint64_t minRows = options.minRowsForSelectivity > 0 ? options.minRowsForSelectivity : 10000;
+        double threshold = options.lowSelectivityThreshold > 0.0 ? options.lowSelectivityThreshold : 0.95;
+        
         // Need minimum rows to judge
-        if (in > 10000) {
+        if (in > minRows) {
           double passThroughRatio = static_cast<double>(out) / in;
           
-          if (passThroughRatio > 0.95 && reportedNodes_.find(op.planNodeId) == reportedNodes_.end()) {
+          if (passThroughRatio > threshold && reportedNodes_.find(op.planNodeId) == reportedNodes_.end()) {
             reportedNodes_.insert(op.planNodeId);
             
             InsightEvent event;
