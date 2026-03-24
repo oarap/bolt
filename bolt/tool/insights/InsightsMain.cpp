@@ -6,6 +6,7 @@
 #include <iostream>
 #include <string>
 #include "bolt/tool/insights/InsightDemoRunner.h"
+#include "bolt/common/memory/Memory.h"
 
 DEFINE_string(command, "", "Command to run: run, snapshot, stream, cancel");
 DEFINE_string(scenario, "default", "Scenario to run (for 'run' command)");
@@ -13,6 +14,10 @@ DEFINE_string(scenario, "default", "Scenario to run (for 'run' command)");
 int main(int argc, char** argv) {
   gflags::ParseCommandLineFlags(&argc, &argv, true);
   google::InitGoogleLogging(argv[0]);
+
+  // Initialize Bolt memory manager for execution
+  bytedance::bolt::memory::MemoryManager::initialize(
+      bytedance::bolt::memory::MemoryManager::Options());
 
   if (FLAGS_command.empty()) {
     std::cerr << "Usage: " << argv[0] << " --command=<cmd>" << std::endl;
