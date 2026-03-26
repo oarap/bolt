@@ -34,6 +34,7 @@ add_executable(
   StringTest.cpp
   TypeAnalysisTest.cpp
   TypedExprSerdeTest.cpp
+  RescueOptimizerTest.cpp
 )
 
 add_test(bolt_core_test bolt_core_test)

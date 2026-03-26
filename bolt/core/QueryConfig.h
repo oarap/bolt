@@ -729,6 +729,11 @@ class QueryConfig {
   static constexpr const char* kBoltTaskSchedulingEnabled =
       "bolt_task_scheduling_enabled";
 
+  static constexpr const char* kEnableRescueOptimizer =
+      "enable_rescue_optimizer";
+
+  static constexpr const char* kEnableRescueExplain = "enable_rescue_explain";
+
   // Lifetime of cached entities (key encryption keys, local wrapping keys, KMS
   // client objects).
   static constexpr const char* kCacheLifetimePropertyName =
@@ -1616,6 +1621,14 @@ class QueryConfig {
 
   bool enableBoltTaskScheduling() const {
     return get<bool>(kBoltTaskSchedulingEnabled, false);
+  }
+
+  bool enableRescueOptimizer() const {
+    return get<bool>(kEnableRescueOptimizer, true);
+  }
+
+  bool enableRescueExplain() const {
+    return get<bool>(kEnableRescueExplain, false);
   }
 
   bool throwExceptionOnDuplicateMapKeys() const {

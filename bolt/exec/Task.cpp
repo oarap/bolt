@@ -39,6 +39,7 @@
 #include "bolt/common/file/FileSystems.h"
 #include "bolt/common/memory/MemoryPool.h"
 #include "bolt/common/time/Timer.h"
+#include "bolt/core/RescueOptimizer.h"
 #include "bolt/exec/Exchange.h"
 #include "bolt/exec/HashBuild.h"
 #include "bolt/exec/LocalPlanner.h"
@@ -279,6 +280,20 @@ std::shared_ptr<Task> Task::create(
     int32_t memoryArbitrationPriority,
     std::optional<common::SpillDiskOptions> spillDiskOpts,
     std::function<void(std::exception_ptr)> onError) {
+  if (queryCtx) {
+    auto optimizedResult =
+        core::RescueOptimizer::optimize(planFragment, queryCtx->queryConfig());
+    planFragment = std::move(optimizedResult.fragment);
+
+    if (queryCtx->queryConfig().enableRescueExplain() &&
+        !optimizedResult.reports.empty()) {
+      for (const auto& report : optimizedResult.reports) {
+        LOG(INFO) << "RescueOptimizer [" << report.ruleName
+                  << "]: " << report.status << " - " << report.proofSummary;
+      }
+    }
+  }
+
   auto task = std::shared_ptr<Task>(new Task(
       taskId,
       std::move(planFragment),

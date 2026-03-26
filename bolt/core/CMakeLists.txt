@@ -34,7 +34,7 @@ target_link_libraries(bolt_config bolt_exception Folly::folly)
 
 bolt_add_library(
   bolt_core Expressions.cpp PlanFragment.cpp PlanNode.cpp QueryConfig.cpp QueryCtx.cpp
-            SimpleFunctionMetadata.cpp
+            SimpleFunctionMetadata.cpp RescueOptimizer.cpp PlanPatternAnalysis.cpp PlanRewriteUtils.cpp RescueRule.cpp
 )
 
 target_link_libraries(

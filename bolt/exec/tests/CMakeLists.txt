@@ -141,6 +141,7 @@ add_executable(
   QueryAssertionsTest.cpp
   TaskTest.cpp
   TreeOfLosersTest.cpp
+  RescueOptimizerBenchmark.cpp
 )
 
 add_test(
