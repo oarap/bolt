@@ -229,7 +229,7 @@ class BoltConan(ConanFile):
             "fmt/9.0.0", transitive_headers=True, transitive_libs=True, force=True
         )
         self.requires("ryu/2.0.1", transitive_headers=True, transitive_libs=True)
-        self.requires("cpr/1.10.5")
+        self.requires("cpr/1.10.5", transitive_headers=True, transitive_libs=True)
         self.requires("zlib/[>=1.3.1 <2]", force=True)
         self.requires("zstd/1.5.7", override=True)
         self.requires(
@@ -281,7 +281,7 @@ class BoltConan(ConanFile):
         if self.options.get_safe("spark_compatible"):
             self.requires("celeborn-cpp-client/main-20251212")
         if self.options.get_safe("enable_testutil"):
-            self.requires("gtest/1.17.0", force=True)
+            self.requires("gtest/1.10.0", force=True)
             self.requires("duckdb/0.8.1")
 
     def build_requirements(self):
@@ -634,7 +634,7 @@ class BoltConan(ConanFile):
                 )
             elif self.settings.os == "Linux":
                 self.cpp_info.components["bolt_engine"].exelinkflags.append(
-                    "-Wl,--export-dynamic-symbol=jit_*"
+                    "-Wl,--export-dynamic"
                 )
         if self.options.get_safe("enable_s3"):
             self.cpp_info.components["bolt_engine"].requires.append(

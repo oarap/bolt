@@ -1,7 +1,10 @@
 #include "bolt/exec/insights/TaskInsightSession.h"
+#include <folly/json.h>
+#include <fstream>
 #include "bolt/common/time/Timer.h"
 #include "bolt/exec/TaskStructs.h"
 #include "bolt/exec/insights/InsightEngine.h"
+#include "bolt/exec/insights/InsightEventJson.h"
 
 namespace bytedance::bolt::exec::insights {
 
@@ -60,6 +63,15 @@ std::vector<InsightEvent> TaskInsightSession::poll() {
     event.sequenceId = ++nextSequenceId_;
     event.queryId = metadata_.queryId;
     event.taskId = metadata_.taskId ? metadata_.taskId : task_->taskId();
+  }
+
+  // Write to a well-known file for the MCP server to pick up
+  if (!events.empty()) {
+    std::ofstream out("/tmp/bolt_insights.json", std::ios::app);
+    for (const auto& event : events) {
+      out << folly::toJson(toJson(event)) << std::endl;
+    }
+    out.close();
   }
 
   return events;

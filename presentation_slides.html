@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bolt Insights Presentation</title>
+    
+    <!-- Reveal.js base CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reset.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.css">
+    
+    <!-- Reveal.js Theme (Blood - dark theme that fits well with performance/tech) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/blood.css" id="theme">
+    
+    <!-- Syntax highlighting for code -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/highlight/monokai.css">
+
+    <style>
+        .reveal h1, .reveal h2, .reveal h3 {
+            text-transform: none;
+        }
+        .reveal .slide-background-content {
+            background-image: radial-gradient(circle at center, #2b0000 0%, #110000 100%);
+        }
+        .insight-table {
+            font-size: 0.7em !important;
+            margin: auto;
+            border-collapse: collapse;
+        }
+        .insight-table th { background: rgba(255,0,0,0.2); }
+        .insight-table td, .insight-table th {
+            border: 1px solid #777;
+            padding: 8px 15px;
+        }
+        
+        /* Fixed mermaid scaling CSS */
+        .mermaid-container {
+            background: rgba(20, 20, 20, 0.8);
+            padding: 5px;
+            border-radius: 8px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+        }
+        .mermaid {
+            width: 100%;
+            height: auto;
+            display: flex;
+            justify-content: center;
+        }
+        .mermaid svg {
+            max-width: 100% !important;
+            max-height: 50vh !important; /* Constrain height to half viewport */
+            height: auto;
+        }
+        
+        .code-snippet {
+            font-size: 0.6em !important;
+        }
+        .highlight-text {
+            color: #ff2c2d;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            
+            <!-- Title Slide -->
+            <section>
+                <h1>⚡ Bolt Insights</h1>
+                <h3>Intelligent Real-Time Execution Diagnostic Framework</h3>
+                <p>
+                    <small>Bridging C++ Query Execution with AI Agents via MCP</small>
+                </p>
+            </section>
+
+            <!-- Problem Statement -->
+            <section>
+                <h2>The Problem</h2>
+                <ul>
+                    <li class="fragment">Query engines (Spark, Presto) offload execution to native C++ backends (Bolt) via JNI.</li>
+                    <li class="fragment">When a query stalls or OOMs in C++, the JVM (Spark/Presto) is completely blind to <em>why</em>.</li>
+                    <li class="fragment">Logs are massive, hard to read in real-time, and disconnected from the orchestrator.</li>
+                </ul>
+            </section>
+
+            <!-- The Solution -->
+            <section>
+                <h2>The Solution: Bolt Insights</h2>
+                <p>A real-time diagnostic layer deeply embedded within the C++ execution engine.</p>
+                <ul>
+                    <li><strong>TaskInsightSession:</strong> Attaches directly to a query task's lifecycle.</li>
+                    <li><strong>TaskSampleCollector:</strong> Asynchronously polls raw C++ stats (memory, drivers, IO).</li>
+                    <li><strong>InsightEngine:</strong> Evaluates rules against history to emit <span class="highlight-text">InsightEvents</span>.</li>
+                </ul>
+            </section>
+
+            <!-- Native Insights -->
+            <section>
+                <h2>The 5 Core Insights</h2>
+                <table class="insight-table">
+                    <thead>
+                        <tr>
+                            <th>Insight Type</th>
+                            <th>Trigger Condition</th>
+                            <th>Meaning</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>query_stalled</code></td>
+                            <td>0 drivers running for multiple samples</td>
+                            <td>Query is deadlocked or starved.</td>
+                        </tr>
+                        <tr>
+                            <td><code>spill_detected</code></td>
+                            <td>In-memory buffers full, writing to disk</td>
+                            <td>Memory-bound, performance will drop.</td>
+                        </tr>
+                        <tr>
+                            <td><code>scan_io_bound</code></td>
+                            <td>Table Scan blocked waiting for storage</td>
+                            <td>Storage is slow or network saturated.</td>
+                        </tr>
+                        <tr>
+                            <td><code>output_backpressure</code></td>
+                            <td>Output buffers consistently &gt;90% full</td>
+                            <td>Client/network consuming too slowly.</td>
+                        </tr>
+                        <tr>
+                            <td><code>scan_low_selectivity</code></td>
+                            <td>Filter drops almost all read data</td>
+                            <td>Missing partitions/indexes, bad plan.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Architecture: Core Generation -->
+            <section>
+                <h2>Architecture: Native Core</h2>
+                <div class="mermaid-container" style="width: 80%;">
+                    <div class="mermaid">
+                        graph TD
+                            A[Query Task execution] -->|TaskStats| B(TaskSampleCollector)
+                            B -->|History Window| C{InsightEngine}
+                            C -->|Evaluates Rules| D[query_stalled]
+                            C -->|Evaluates Rules| E[spill_detected]
+                            C -->|Evaluates Rules| F[scan_io_bound]
+                            C -->|Evaluates Rules| G[output_backpressure]
+                            C -->|Evaluates Rules| H[scan_low_selectivity]
+                            
+                            style A fill:#f9f,stroke:#333,stroke-width:2px
+                            style C fill:#bbf,stroke:#333,stroke-width:2px
+                    </div>
+                </div>
+            </section>
+
+            <!-- Integration -->
+            <section>
+                <h2>Execution Engine Integration</h2>
+                <div class="mermaid-container" style="width: 90%;">
+                    <div class="mermaid">
+                        flowchart LR
+                            subgraph JVM["☕ JVM / Python Space"]
+                                direction TB
+                                Spark["Apache Spark / PySpark"] --> Gluten["Gluten Plugin"]
+                                Presto["Presto Coordinator"]
+                            end
+                        
+                            subgraph Native["⚡ C++ Native Space"]
+                                direction TB
+                                Gluten --"JNI Hand-off"--> BoltBackend["libbolt_backend.so"]
+                                
+                                BoltBackend --> Task["exec::Task"]
+                                Presto --"Thrift/REST"--> Task
+                                
+                                Task -.->|"Monitors Stats"| Registry["InsightSessionRegistry"]
+                                Registry --> Session["TaskInsightSession"]
+                            end
+                            
+                            style JVM fill:#4a1c40,stroke:#ff2c2d,stroke-width:2px,color:#fff
+                            style Native fill:#1c2a4a,stroke:#4a90e2,stroke-width:2px,color:#fff
+                            style Session fill:#ff2c2d,stroke:#fff,stroke-width:2px,color:#fff
+                            style Spark fill:#333,stroke:#fff
+                            style Gluten fill:#333,stroke:#fff
+                            style Presto fill:#333,stroke:#fff
+                            style BoltBackend fill:#333,stroke:#fff
+                            style Task fill:#333,stroke:#fff
+                            style Registry fill:#333,stroke:#fff
+                    </div>
+                </div>
+            </section>
+
+            <!-- Observation & Agent Loop -->
+            <section>
+                <h2>AI Agent Loop via MCP</h2>
+                <p>We expose C++ insights to LLMs using the <strong>Model Context Protocol (MCP)</strong>.</p>
+                <div class="mermaid-container">
+                    <div class="mermaid">
+                        sequenceDiagram
+                            autonumber
+                            participant Spark as Spark
+                            participant Bolt as Bolt C++
+                            participant MCP as MCP Server
+                            participant Agent as AI Agent
+                            
+                            Spark->>Bolt: Execute Native
+                            Bolt->>Bolt: Detect Stalled
+                            Bolt-->>MCP: JSON Insight
+                            Agent->>MCP: poll()
+                            MCP-->>Agent: Return Insight
+                            Agent->>Agent: Analyze
+                            Agent->>MCP: cancel()
+                            MCP->>Spark: Abort Job
+                    </div>
+                </div>
+            </section>
+
+            <!-- Demo 1: Standalone -->
+            <section>
+                <h2>Demo A: Agent Action Loop</h2>
+                <p>Testing the MCP Server and AI Agent logic safely.</p>
+                
+                <pre><code class="bash code-snippet" data-trim>
+# Start the Python MCP Client/Server logic
+python3 ~/bolt/mcp_script_test.py
+                </code></pre>
+                
+                <div style="font-size: 0.6em; text-align: left; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 5px;">
+                    <strong>What it does autonomously:</strong><br>
+                    1. Starts the standalone tool with <code>query_stalled</code> scenario.<br>
+                    2. Agent polls the MCP server continuously.<br>
+                    3. Agent detects the stalled state.<br>
+                    4. Agent intercepts and fires a Cancellation command.
+                </div>
+            </section>
+
+            <!-- Demo 2: Spark -->
+            <section>
+                <h2>Demo B: Real Spark Offloading</h2>
+                <p>Triggering the actual C++ engine via PySpark.</p>
+                
+                <pre><code class="bash code-snippet" data-trim>
+# Run PySpark query with Gluten plugin attached
+bash ~/run_spark_with_gluten.sh
+                </code></pre>
+                
+                <div style="font-size: 0.6em; text-align: left; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 5px;">
+                    <strong>Under the Hood:</strong><br>
+                    1. Generates 100M rows in memory.<br>
+                    2. Runs complex HashAggregations via PySpark.<br>
+                    3. <code>GlutenPlugin</code> hands the query to <code>libbolt_backend.so</code>.<br>
+                    4. <code>TaskInsightSession</code> successfully attaches to the native C++ Spark Task!<br>
+                    5. Query results are returned normally.
+                </div>
+            </section>
+
+            <section>
+                <h1>Thank You</h1>
+                <h3>Ready for Questions</h3>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- Reveal.js Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/notes/notes.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/markdown/markdown.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/highlight/highlight.js"></script>
+    
+    <!-- Mermaid JS Integration -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+
+    <script>
+        // Initialize Reveal.js
+        Reveal.initialize({
+            hash: true,
+            slideNumber: true,
+            plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+        });
+
+        // Initialize Mermaid after Reveal.js is ready, and specifically format for slides
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: 'dark',
+            securityLevel: 'loose',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+        
+        async function renderMermaidDiagrams(slide) {
+            const diagrams = slide.querySelectorAll('.mermaid:not([data-processed="true"])');
+            for (let i = 0; i < diagrams.length; i++) {
+                const element = diagrams[i];
+                try {
+                    // Extract text content and escape properly
+                    let graphDefinition = element.textContent.trim();
+                    // Some browsers might encode > as &gt;
+                    graphDefinition = graphDefinition.replace(/&gt;/g, '>');
+                    graphDefinition = graphDefinition.replace(/&lt;/g, '<');
+                    
+                    const id = `mermaid-${Date.now()}-${i}`;
+                    const { svg } = await mermaid.render(id, graphDefinition);
+                    element.innerHTML = svg;
+                    element.setAttribute('data-processed', 'true');
+                } catch (e) {
+                    console.error('Mermaid rendering failed', e);
+                }
+            }
+        }
+
+        Reveal.addEventListener('ready', event => {
+            renderMermaidDiagrams(document);
+        });
+        
+        // Re-render mermaid diagrams when sliding to them to prevent sizing issues
+        Reveal.addEventListener('slidechanged', event => {
+            renderMermaidDiagrams(event.currentSlide);
+        });
+    </script>
+</body>
+</html>

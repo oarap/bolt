@@ -5,10 +5,13 @@
 #include <glog/logging.h>
 #include <iostream>
 #include <string>
-#include "bolt/tool/insights/InsightDemoRunner.h"
 #include "bolt/common/memory/Memory.h"
+#include "bolt/tool/insights/InsightDemoRunner.h"
 
-DEFINE_string(command, "", "Command to run: run, snapshot, stream, cancel");
+DEFINE_string(
+    command,
+    "",
+    "Command to run: run, interactive, snapshot, stream, cancel");
 DEFINE_string(scenario, "default", "Scenario to run (for 'run' command)");
 
 int main(int argc, char** argv) {
@@ -21,7 +24,8 @@ int main(int argc, char** argv) {
 
   if (FLAGS_command.empty()) {
     std::cerr << "Usage: " << argv[0] << " --command=<cmd>" << std::endl;
-    std::cerr << "Commands: run, snapshot, stream, cancel" << std::endl;
+    std::cerr << "Commands: run, interactive, snapshot, stream, cancel"
+              << std::endl;
     return 1;
   }
 
@@ -29,6 +33,8 @@ int main(int argc, char** argv) {
 
   if (FLAGS_command == "run") {
     runner.runScenario(FLAGS_scenario);
+  } else if (FLAGS_command == "interactive") {
+    runner.runInteractive(FLAGS_scenario);
   } else if (FLAGS_command == "snapshot") {
     runner.snapshot();
   } else if (FLAGS_command == "stream") {

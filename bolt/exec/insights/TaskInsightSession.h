@@ -4,7 +4,9 @@
 #include <memory>
 #include <mutex>
 #include <vector>
-#include "bolt/exec/Task.h"
+namespace bytedance::bolt::exec {
+class Task;
+}
 #include "bolt/exec/insights/Insight.h"
 #include "bolt/exec/insights/InsightOptions.h"
 #include "bolt/exec/insights/TaskSampleCollector.h"

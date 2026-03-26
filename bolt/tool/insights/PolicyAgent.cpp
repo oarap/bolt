@@ -14,7 +14,7 @@ PolicyAgent::PolicyDecision PolicyAgent::evaluate(
 
     // Cancel on high severity backpressure or stall
     if (event.kind == "output_backpressure" &&
-        event.severity == exec::insights::InsightSeverity::kHigh) {
+        event.severity >= exec::insights::InsightSeverity::kMedium) {
       return {Action::kCancel, "High severity backpressure detected"};
     }
 
@@ -25,8 +25,15 @@ PolicyAgent::PolicyDecision PolicyAgent::evaluate(
 
     // Suggest rerun for low selectivity
     if (event.kind == "scan_low_selectivity" &&
-        event.severity == exec::insights::InsightSeverity::kHigh) {
+        event.severity >= exec::insights::InsightSeverity::kMedium) {
       return {Action::kRerun, "Poor scan selectivity, consider adding filters"};
+    }
+
+    // Inspect spill
+    if (event.kind == "spill_detected") {
+      return {
+          Action::kContinue,
+          "Spill detected, performance might degrade. Monitoring..."};
     }
   }
 
